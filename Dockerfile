@@ -1,23 +1,31 @@
-## Stage 1: Build the app
-FROM node:lts AS build
-
+# Build stage
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Install dependencies
-COPY package.json package-lock.json ./
+# Aumentar memória para o build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Copiar arquivos de dependência
+COPY package*.json ./
 RUN npm install
 
-# Copy source code
+# Copiar resto do projeto
 COPY . .
 
-# Fix for Astro in Docker: https://github.com/withastro/astro/issues/2596
-ENV NODE_OPTIONS=--max_old_space_size=2048
-# Build the app
+# Build
 RUN npm run build
 
+# Production stage - servir arquivos estáticos
+FROM node:20-alpine AS runner
+WORKDIR /app
 
-## Stage 2: Serve app with httpd server
-FROM httpd:2.4
+# Instalar servidor HTTP simples
+RUN npm install -g serve
 
-# Copy built app to serve
-COPY --from=build /app/dist /usr/local/apache2/htdocs
+# Copiar arquivos buildados
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3000
+
+# Servir arquivos estáticos
+CMD ["serve", "dist", "-l", "3000", "-s"]
