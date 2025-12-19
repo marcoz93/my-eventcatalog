@@ -1,5 +1,5 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Build stage - usar node normal (não alpine) para ter bash
+FROM node:20 AS builder
 WORKDIR /app
 
 # Aumentar memória para o build
