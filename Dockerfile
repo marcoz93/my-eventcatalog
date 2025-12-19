@@ -28,4 +28,4 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 3000
 
 # Servir arquivos estáticos
-CMD ["serve", "dist", "-l", "3000", "-s"]
+CMD ["serve", "dist", "-l", "3000"]
